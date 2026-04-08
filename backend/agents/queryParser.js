@@ -90,3 +90,36 @@ function buildLinkedInURL(params) {
 
   return `${base}?${urlParams.toString()}`;
 }
+
+
+function fallbackParse(query) {
+  const lower = query.toLowerCase();
+
+  // Try to extract role (everything before "in" or "at" or "jobs")
+  const roleMatch = query.match(/(?:find|search|get|show)?\s*(?:me)?\s*([\w\s]+?)\s+(?:jobs?|positions?|roles?|openings?)/i);
+  const role = roleMatch ? roleMatch[1].trim() : 'software developer';
+
+  // Try to extract location
+  const locMatch = query.match(/(?:in|at|near|around)\s+([\w\s,]+?)(?:\s+for|\s+with|\s*$)/i);
+  const location = locMatch ? locMatch[1].trim() : 'India';
+
+  // Detect experience level
+  let experience = 'any';
+  if (/senior|sr\.|lead|principal/i.test(lower)) experience = 'senior';
+  else if (/junior|jr\.|fresher|entry/i.test(lower)) experience = 'junior';
+  else if (/mid|intermediate/i.test(lower)) experience = 'mid';
+
+  // Detect job type
+  let jobType = 'full-time';
+  if (/remote|wfh/i.test(lower)) jobType = 'remote';
+  else if (/intern/i.test(lower)) jobType = 'internship';
+  else if (/contract|freelance/i.test(lower)) jobType = 'contract';
+
+  const params = { role, location, jobType, experience, keywords: [role], company: null };
+  params.linkedinUrl = buildLinkedInURL(params);
+  params.originalQuery = query;
+
+  return params;
+}
+
+module.exports = { parseJobQuery, buildLinkedInURL };
