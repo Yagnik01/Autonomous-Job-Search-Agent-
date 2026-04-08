@@ -159,3 +159,44 @@ async function scrapeLinkedInJobs(searchUrl, maxResults = 10) {
     }
   }
 }
+/** 
+ * @param {string} searchUrl - Used to infer role/location for relevant mocks
+ * @param {number} count
+ */
+function getMockJobs(searchUrl = '', count = 10) {
+  // Parse role and location from URL for more relevant mocks
+  let role = 'Software Developer';
+  let location = 'Bangalore, India';
+
+  try {
+    const url = new URL(searchUrl);
+    const keywords = url.searchParams.get('keywords') || 'Software Developer';
+    const loc = url.searchParams.get('location') || 'Bangalore';
+    role = keywords.replace(/\+/g, ' ');
+    location = loc.replace(/\+/g, ' ');
+  } catch {}
+
+  const companies = [
+    'Google', 'Microsoft', 'Amazon', 'Flipkart', 'Swiggy',
+    'Zomato', 'Razorpay', 'Freshworks', 'Infosys', 'Wipro',
+    'TCS', 'Accenture', 'PhonePe', 'CRED', 'Meesho'
+  ];
+
+  const jobTypes = [
+    `Senior ${role}`, `Junior ${role}`, `${role} II`,
+    `Lead ${role}`, `${role} Engineer`, `Staff ${role}`,
+    `Principal ${role}`, `${role} (Remote)`, `${role} - Startup`,
+    `${role} Intern`
+  ];
+
+  return Array.from({ length: Math.min(count, 10) }, (_, i) => ({
+    title: jobTypes[i] || `${role} - Position ${i + 1}`,
+    company: companies[i] || `Tech Company ${i + 1}`,
+    location: i % 3 === 0 ? 'Remote' : location,
+    link: `https://www.linkedin.com/jobs/view/${1000000 + i * 12345}/`,
+    postedDate: `${i + 1} day${i > 0 ? 's' : ''} ago`,
+    isMock: true
+  }));
+}
+
+module.exports = { scrapeLinkedInJobs, getMockJobs };
